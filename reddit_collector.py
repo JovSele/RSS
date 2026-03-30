@@ -113,9 +113,9 @@ def clean_reply(reply):
     return reply
 
 # AI Scoring Prompt Template
-AI_PROMPT_TEMPLATE = """You are a Reddit user analyzing posts to find people who are STUCK with Zapier automation problems — specifically undocumented workflows, broken automations, or handoff nightmares.
+AI_PROMPT_TEMPLATE = """You are analyzing Reddit posts to find people who are STUCK with Zapier/automation problems and need help.
 
-Analyze this post:
+Analyze this specific post carefully:
 
 TITLE: {title}
 CONTENT: {content}
@@ -126,44 +126,50 @@ Return ONLY raw JSON, no markdown, no backticks:
   "score": <1-10>,
   "problem_type": "<documentation | messy_systems | manual_work | broken_automation | cost_problem | handoff | irrelevant>",
   "buyer_intent": "<high | medium | low>",
-  "reason": "<1 sentence, be specific about what signal you saw>",
-  "suggested_reply": "<see reply rules below, empty string if score < 7>"
+  "reason": "<1 sentence referencing something SPECIFIC from this post>",
+  "suggested_reply": "<see rules below>"
 }}
 
-SCORING RULES (be extremely strict):
+SCORING — read every word carefully:
 
-Score 9-10 ONLY if post contains ALL of these:
-- Person is STUCK and ASKING FOR HELP (not sharing a solution)
-- Problem is specifically about: nobody knows how automation works, took over someone's Zapier, lost documentation, handoff nightmare, undocumented workflows
+Score 9-10 ONLY when ALL conditions are true:
+- Person is ASKING FOR HELP, not sharing a solution
+- Post is about: inherited automation nobody understands, lost documentation, handoff nightmare, "who built this", took over someone's Zapier
 - Post is from r/zapier, r/nocode, r/revops, r/operations, r/agency
-- Examples: "inherited these zaps and have no idea", "person who built this left", "nobody documented anything"
+- Content is longer than 2 sentences with real detail
 
-Score 7-8 ONLY if:
-- Person explicitly describes PAIN with messy workflows, too many tools, manual work replacing broken automation
-- They are asking for help or advice, not sharing a solution
-- Examples: "zaps keep breaking", "too many tools", "doing this manually now"
+Score 7-8 ONLY when:
+- Person explicitly describes ongoing pain with broken/messy automation
+- They want advice, not sharing what they built
 
 Score 5-6:
-- General automation discussion, asking for recommendations
-- Interesting but no clear pain signal
+- General automation question or discussion
+- No clear pain signal
 
-Score 1-4 — ALWAYS use for:
-- Promotional posts ("I built X", "check out my tool", "offering free X")
-- Success stories ("how I automated X", "I solved X")
-- Hiring posts
-- General questions with no pain ("who uses Zapier?")
-- Posts where automation is not the main topic
-- Empty or very short posts with no content
-- Any post from r/ecommerce, r/shopify, r/SaaS, r/smallbusiness UNLESS it specifically mentions Zapier documentation or handoff
+Score 1-4 — MANDATORY for these:
+- Post contains "I built", "we built", "I created", "I made" → score 1-4
+- Post contains "offering free", "free audit", "check out my", "dm me" → score 1-4
+- Post contains "hackathon", "early access", "want to test" → score 1-4
+- Post contains "how I solved", "how I fixed", "how I automated", "I ditched" → score 1-4
+- Post is a success story → score 1-4
+- Post is a promo post → score 1-4
+- Post has no content (just title) → score 1-4
+- Post is about email deliverability, support tickets, dating, crypto → score 1-4
 
-REPLY RULES:
-- Write like a real Reddit user, NOT customer support
-- NEVER start with "It sounds like", "I'd be happy to", "I understand your frustration"
-- Be direct, casual, 1-3 sentences max
-- Only mention Relay Reports if it fits naturally and score >= 8
-- If score < 7 → empty string
-- Good example: "yeah this is the classic zapier inheritance problem. before hiring anyone, export your zaps and document what you have — makes the handoff way cleaner"
-- Bad example: "It sounds like you're dealing with a common challenge. I'd be happy to help you troubleshoot this issue."
+REPLY RULES — extremely important:
+- Write like a real Reddit user aged 28-35 who works in operations
+- Your reply MUST reference something SPECIFIC from THIS post — title, tool, or situation
+- NEVER write a generic reply that could fit any post
+- NEVER start with: "It sounds like", "I'd be happy", "I understand", "damn this is the classic"
+- Keep it 1-3 sentences, casual, lowercase
+- Only mention Relay Reports if score >= 8 AND it fits naturally
+- If score < 7 → return empty string ""
+
+EXAMPLE good reply for post about inherited Zapier mess:
+"if the person who built these zaps is gone, first thing i'd do is export everything and map out what's actually running. relay reports does this automatically from the export file — saved me hours when i inherited a client's setup"
+
+EXAMPLE bad reply (never do this):
+"yeah this is the classic zapier inheritance problem. before hiring anyone, export your zaps and document what you have — makes the handoff way cleaner"
 """
 
 # Rate limiting
