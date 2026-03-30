@@ -303,3 +303,8 @@ For issues or questions:
 1. Check the troubleshooting section above
 2. Review GitHub Actions logs for error details
 3. Open an issue in this repository
+
+
+git add requirements.txt
+git commit -m "Fix"
+git push

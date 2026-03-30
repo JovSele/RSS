@@ -86,27 +86,31 @@ NEGATIVE_KEYWORDS = [
 ]
 
 # AI Scoring Prompt Template
-AI_PROMPT_TEMPLATE = """You are analyzing posts from Reddit or LinkedIn to find people who struggle with messy automations, undocumented workflows, manual reporting, or automation maintenance problems.
+AI_PROMPT_TEMPLATE = """You are analyzing posts from Reddit or LinkedIn to identify people who EXPLICITLY struggle with automation documentation, workflow handoffs, or system maintenance problems.
 
 Analyze this post:
+
 TITLE: {title}
 CONTENT: {content}
 SOURCE: {source}
 
-Return ONLY raw JSON:
+Return ONLY raw JSON, no markdown, no backticks:
 {{
-  "score": 1-10,
-  "problem_type": "documentation | messy_systems | manual_work | broken_automation | cost_problem | handoff | other | irrelevant",
-  "buyer_intent": "high | medium | low",
-  "reason": "1 sentence",
-  "suggested_reply": "casual helpful reply under 80 words, empty if score < 7"
+  "score": <1-10>,
+  "problem_type": "<documentation | messy_systems | manual_work | broken_automation | cost_problem | handoff | other | irrelevant>",
+  "buyer_intent": "<high | medium | low>",
+  "reason": "<1 sentence>",
+  "suggested_reply": "<casual helpful reply under 80 words, empty string if score < 7>"
 }}
 
-Scoring:
-9-10: System broke, undocumented automation, handoff problems, zapier cost, nobody knows how it works
-7-8: Workflow messy, manual work, too many tools, reporting pain
-5-6: General automation discussion
-1-4: Not relevant"""
+Scoring (be VERY strict - most posts should score 5 or below):
+9-10: Person EXPLICITLY says: system broke, nobody knows how this works, took over someone's automation, need to document zapier, handoff problem, lost documentation, undocumented workflows. Maximum 5% of posts.
+7-8: Person has CLEAR pain with messy workflows, manual work replacing automation, too many tools chaos, maintenance nightmare. Maximum 15% of posts.
+5-6: General automation discussion, asking for tool recommendations, success stories.
+1-4: Hiring posts, promotional content, general questions without clear pain signals.
+
+When in doubt → score LOWER.
+It is better to miss a lead than to score irrelevant posts high."""
 
 # Rate limiting
 RATE_LIMIT_BETWEEN_POSTS = 0.5  # seconds
