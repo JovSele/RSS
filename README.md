@@ -305,6 +305,6 @@ For issues or questions:
 3. Open an issue in this repository
 
 
-git add requirements.txt
-git commit -m "Fix"
+git add .
+git commit -m "Stricter AI scoring prompt"
 git push

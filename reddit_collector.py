@@ -82,8 +82,35 @@ NEGATIVE_KEYWORDS = [
     "hiring", "job offer", "looking for work", "we are hiring", "salary", "resume",
     "portfolio", "giveaway", "promo code", "discount", "just launched my",
     "check out my", "follow me", "subscribe to", "crypto", "nft", "invest",
-    "trading", "dating", "relationship", "meme", "funny", "joke"
+    "trading", "dating", "relationship", "meme", "funny", "joke",
+    "i built", "i'm offering", "free audit", "offering free",
+    "i created", "just launched", "i made a tool", "my tool", "sign up",
+    "try it free", "dm me", "how i solved", "how i automated", "how i fixed",
+    "i ditched", "i stopped", "i switched from"
 ]
+
+BAD_PHRASES = [
+    "it sounds like",
+    "i'd be happy to",
+    "i understand your frustration",
+    "i'm sorry to hear",
+    "feel free to",
+    "don't hesitate to",
+    "i hope this helps",
+    "let me know if you",
+    "happy to discuss",
+    "happy to help",
+    "happy to chat",
+]
+
+def clean_reply(reply):
+    if not reply:
+        return ""
+    reply_lower = reply.lower()
+    for phrase in BAD_PHRASES:
+        if phrase in reply_lower:
+            return ""
+    return reply
 
 # AI Scoring Prompt Template
 AI_PROMPT_TEMPLATE = """You are a Reddit user analyzing posts to find people who are STUCK with Zapier automation problems — specifically undocumented workflows, broken automations, or handoff nightmares.
@@ -423,6 +450,9 @@ class RSSCollector:
                 'reason': '',
                 'suggested_reply': ''
             }
+        
+        # Clean the suggested reply
+        ai_result["suggested_reply"] = clean_reply(ai_result.get("suggested_reply", ""))
         
         # Prepare row for Google Sheets
         row = [
