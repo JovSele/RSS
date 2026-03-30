@@ -86,7 +86,7 @@ NEGATIVE_KEYWORDS = [
 ]
 
 # AI Scoring Prompt Template
-AI_PROMPT_TEMPLATE = """You are analyzing posts from Reddit or LinkedIn to identify people who EXPLICITLY struggle with automation documentation, workflow handoffs, or system maintenance problems.
+AI_PROMPT_TEMPLATE = """You are a Reddit user analyzing posts to find people who are STUCK with Zapier automation problems — specifically undocumented workflows, broken automations, or handoff nightmares.
 
 Analyze this post:
 
@@ -97,20 +97,47 @@ SOURCE: {source}
 Return ONLY raw JSON, no markdown, no backticks:
 {{
   "score": <1-10>,
-  "problem_type": "<documentation | messy_systems | manual_work | broken_automation | cost_problem | handoff | other | irrelevant>",
+  "problem_type": "<documentation | messy_systems | manual_work | broken_automation | cost_problem | handoff | irrelevant>",
   "buyer_intent": "<high | medium | low>",
-  "reason": "<1 sentence>",
-  "suggested_reply": "<casual helpful reply under 80 words, empty string if score < 7>"
+  "reason": "<1 sentence, be specific about what signal you saw>",
+  "suggested_reply": "<see reply rules below, empty string if score < 7>"
 }}
 
-Scoring (be VERY strict - most posts should score 5 or below):
-9-10: Person EXPLICITLY says: system broke, nobody knows how this works, took over someone's automation, need to document zapier, handoff problem, lost documentation, undocumented workflows. Maximum 5% of posts.
-7-8: Person has CLEAR pain with messy workflows, manual work replacing automation, too many tools chaos, maintenance nightmare. Maximum 15% of posts.
-5-6: General automation discussion, asking for tool recommendations, success stories.
-1-4: Hiring posts, promotional content, general questions without clear pain signals.
+SCORING RULES (be extremely strict):
 
-When in doubt → score LOWER.
-It is better to miss a lead than to score irrelevant posts high."""
+Score 9-10 ONLY if post contains ALL of these:
+- Person is STUCK and ASKING FOR HELP (not sharing a solution)
+- Problem is specifically about: nobody knows how automation works, took over someone's Zapier, lost documentation, handoff nightmare, undocumented workflows
+- Post is from r/zapier, r/nocode, r/revops, r/operations, r/agency
+- Examples: "inherited these zaps and have no idea", "person who built this left", "nobody documented anything"
+
+Score 7-8 ONLY if:
+- Person explicitly describes PAIN with messy workflows, too many tools, manual work replacing broken automation
+- They are asking for help or advice, not sharing a solution
+- Examples: "zaps keep breaking", "too many tools", "doing this manually now"
+
+Score 5-6:
+- General automation discussion, asking for recommendations
+- Interesting but no clear pain signal
+
+Score 1-4 — ALWAYS use for:
+- Promotional posts ("I built X", "check out my tool", "offering free X")
+- Success stories ("how I automated X", "I solved X")
+- Hiring posts
+- General questions with no pain ("who uses Zapier?")
+- Posts where automation is not the main topic
+- Empty or very short posts with no content
+- Any post from r/ecommerce, r/shopify, r/SaaS, r/smallbusiness UNLESS it specifically mentions Zapier documentation or handoff
+
+REPLY RULES:
+- Write like a real Reddit user, NOT customer support
+- NEVER start with "It sounds like", "I'd be happy to", "I understand your frustration"
+- Be direct, casual, 1-3 sentences max
+- Only mention Relay Reports if it fits naturally and score >= 8
+- If score < 7 → empty string
+- Good example: "yeah this is the classic zapier inheritance problem. before hiring anyone, export your zaps and document what you have — makes the handoff way cleaner"
+- Bad example: "It sounds like you're dealing with a common challenge. I'd be happy to help you troubleshoot this issue."
+"""
 
 # Rate limiting
 RATE_LIMIT_BETWEEN_POSTS = 0.5  # seconds
