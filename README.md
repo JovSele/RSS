@@ -308,3 +308,8 @@ For issues or questions:
 git add .
 git commit -m "Stricter AI scoring prompt"
 git push
+
+Zmena je jednoduchá — v reddit_collector.py nájdi:
+pythonmodel="claude-haiku-4-5-20251001"
+Zmeň na:
+pythonmodel="claude-sonnet-4-5-20250514"

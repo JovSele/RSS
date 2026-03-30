@@ -126,16 +126,14 @@ Return ONLY raw JSON, no markdown, no backticks:
   "score": <1-10>,
   "problem_type": "<documentation | messy_systems | manual_work | broken_automation | cost_problem | handoff | irrelevant>",
   "buyer_intent": "<high | medium | low>",
-  "reason": "<1 sentence referencing something SPECIFIC from this post>",
-  "suggested_reply": "<see rules below>"
+  "reason": "<1 sentence referencing something SPECIFIC from this post>"
 }}
 
 SCORING — read every word carefully:
 
 Score 9-10 ONLY when ALL conditions are true:
 - Person is ASKING FOR HELP, not sharing a solution
-- Post is about: inherited automation nobody understands, lost documentation, handoff nightmare, "who built this", took over someone's Zapier
-- Post is from r/zapier, r/nocode, r/revops, r/operations, r/agency
+- Post is about: inherited automation nobody understands, lost documentation, handoff nightmare, took over someone's Zapier, broken system nobody can fix
 - Content is longer than 2 sentences with real detail
 
 Score 7-8 ONLY when:
@@ -155,22 +153,8 @@ Score 1-4 — MANDATORY for these:
 - Post is a promo post → score 1-4
 - Post has no content (just title) → score 1-4
 - Post is about email deliverability, support tickets, dating, crypto → score 1-4
-
-REPLY RULES — extremely important:
-- Write like a real Reddit user aged 28-35 who works in operations
-- Your reply MUST reference something SPECIFIC from THIS post — title, tool, or situation
-- NEVER write a generic reply that could fit any post
-- NEVER start with: "It sounds like", "I'd be happy", "I understand", "damn this is the classic"
-- Keep it 1-3 sentences, casual, lowercase
-- Only mention Relay Reports if score >= 8 AND it fits naturally
-- If score < 7 → return empty string ""
-
-EXAMPLE good reply for post about inherited Zapier mess:
-"if the person who built these zaps is gone, first thing i'd do is export everything and map out what's actually running. relay reports does this automatically from the export file — saved me hours when i inherited a client's setup"
-
-EXAMPLE bad reply (never do this):
-"yeah this is the classic zapier inheritance problem. before hiring anyone, export your zaps and document what you have — makes the handoff way cleaner"
 """
+
 
 # Rate limiting
 RATE_LIMIT_BETWEEN_POSTS = 0.5  # seconds
@@ -317,7 +301,7 @@ class AIScorer:
             # Call Claude API
             message = self.client.messages.create(
                 model="claude-3-haiku-20240307",
-                max_tokens=500,
+                max_tokens=150,
                 messages=[
                     {"role": "user", "content": prompt}
                 ]
