@@ -23,21 +23,21 @@ from bs4 import BeautifulSoup
 
 # RSS Feeds to monitor
 RSS_FEEDS = [
-    # Reddit - New Posts
-    "https://www.reddit.com/r/zapier/new/.rss",
-    "https://www.reddit.com/r/nocode/new/.rss",
-    "https://www.reddit.com/r/automation/new/.rss",
-    "https://www.reddit.com/r/smallbusiness/new/.rss",
-    "https://www.reddit.com/r/Entrepreneur/new/.rss",
-    "https://www.reddit.com/r/startups/new/.rss",
-    "https://www.reddit.com/r/revops/new/.rss",
-    "https://www.reddit.com/r/operations/new/.rss",
-    "https://www.reddit.com/r/agency/new/.rss",
-    "https://www.reddit.com/r/shopify/new/.rss",
-    "https://www.reddit.com/r/hubspot/new/.rss",
-    "https://www.reddit.com/r/salesforce/new/.rss",
-    "https://www.reddit.com/r/ecommerce/new/.rss",
-    "https://www.reddit.com/r/SaaS/new/.rss",
+     # Reddit - New Posts
+    "https://www.reddit.com/r/zapier/new.rss",
+    "https://www.reddit.com/r/nocode/new.rss",
+    "https://www.reddit.com/r/automation/new.rss",
+    "https://www.reddit.com/r/smallbusiness/new.rss",
+    "https://www.reddit.com/r/Entrepreneur/new.rss",
+    "https://www.reddit.com/r/startups/new.rss",
+    "https://www.reddit.com/r/revops/new.rss",
+    "https://www.reddit.com/r/operations/new.rss",
+    "https://www.reddit.com/r/agency/new.rss",
+    "https://www.reddit.com/r/shopify/new.rss",
+    "https://www.reddit.com/r/hubspot/new.rss",
+    "https://www.reddit.com/r/salesforce/new.rss",
+    "https://www.reddit.com/r/ecommerce/new.rss",
+    "https://www.reddit.com/r/SaaS/new.rss",
     
     # Reddit - Search Queries (sort=new)
     "https://www.reddit.com/r/zapier/search.rss?q=zapier&sort=new&restrict_sr=on",
@@ -110,33 +110,11 @@ NEGATIVE_KEYWORDS = [
     "whitepaper", "work from home"
 ]
 
-BAD_PHRASES = [
-    "it sounds like",
-    "i'd be happy to",
-    "i understand your frustration",
-    "i'm sorry to hear",
-    "feel free to",
-    "don't hesitate to",
-    "i hope this helps",
-    "let me know if you",
-    "happy to discuss",
-    "happy to help",
-    "happy to chat",
-]
-
-def clean_reply(reply):
-    if not reply:
-        return ""
-    reply_lower = reply.lower()
-    for phrase in BAD_PHRASES:
-        if phrase in reply_lower:
-            return ""
-    return reply
 
 # AI Scoring Prompt Template
-AI_PROMPT_TEMPLATE = """You are analyzing Reddit posts to find people who are STUCK with Zapier/automation problems and need help.
+AI_PROMPT_TEMPLATE = """You are a lead scoring assistant for Relay Reports (relayreports.app) — a tool that analyzes Zapier exports and generates automation documentation.
 
-Analyze this specific post carefully:
+Analyze this post:
 
 TITLE: {title}
 CONTENT: {content}
@@ -144,36 +122,28 @@ SOURCE: {source}
 
 Return ONLY raw JSON, no markdown, no backticks:
 {{
-  "score": <1-10>,
+  "score": <1-5>,
   "problem_type": "<documentation | messy_systems | manual_work | broken_automation | cost_problem | handoff | irrelevant>",
   "buyer_intent": "<high | medium | low>",
   "reason": "<1 sentence referencing something SPECIFIC from this post>"
 }}
 
-SCORING — read every word carefully:
+SCORING:
 
-Score 9-10 ONLY when ALL conditions are true:
-- Person is ASKING FOR HELP, not sharing a solution
-- Post is about: inherited automation nobody understands, lost documentation, handoff nightmare, took over someone's Zapier, broken system nobody can fix
-- Content is longer than 2 sentences with real detail
+5 — Person has Zapier/automation chaos, inherited workflows, needs documentation or handoff, asking for help. ALL must be true:
+- Asking for help, not sharing a solution
+- Specific pain: inherited zaps, nobody knows how it works, handoff nightmare, lost documentation
+- Content longer than 2 sentences
 
-Score 7-8 ONLY when:
-- Person explicitly describes ongoing pain with broken/messy automation
-- They want advice, not sharing what they built
+4 — Person describes manual processes, messy operations, too many tools, broken automation, workflow problems
 
-Score 5-6:
-- General automation question or discussion
-- No clear pain signal
+3 — General automation discussion, adjacent conversation about operations
 
-Score 1-4 — MANDATORY for these:
-- Post contains "I built", "we built", "I created", "I made" → score 1-4
-- Post contains "offering free", "free audit", "check out my", "dm me" → score 1-4
-- Post contains "hackathon", "early access", "want to test" → score 1-4
-- Post contains "how I solved", "how I fixed", "how I automated", "I ditched" → score 1-4
-- Post is a success story → score 1-4
-- Post is a promo post → score 1-4
-- Post has no content (just title) → score 1-4
-- Post is about email deliverability, support tickets, dating, crypto → score 1-4
+2 — Vendor promoting services, thought leadership, success stories, "I built X"
+
+1 — MANDATORY for: hiring, job, resume, CV, recruiter, spam, promo ("check out my", "dm me", "free audit", "we offer", "sign up"), humor, empty posts
+
+Ideal customer: Zapier power users, operations managers, no-code consultants, automation agencies.
 """
 
 
@@ -321,7 +291,7 @@ class AIScorer:
             
             # Call Claude API
             message = self.client.messages.create(
-                model="claude-3-haiku-20240307",
+                model="claude-haiku-4-5-20251001",
                 max_tokens=150,
                 messages=[
                     {"role": "user", "content": prompt}
@@ -340,7 +310,7 @@ class AIScorer:
             result = json.loads(response_text)
             
             # Validate required fields
-            required_fields = ["score", "problem_type", "buyer_intent", "reason", "suggested_reply"]
+            required_fields = ["score", "problem_type", "buyer_intent", "reason"]
             if not all(field in result for field in required_fields):
                 print(f"⚠ Warning: AI response missing required fields")
                 return None
@@ -463,7 +433,7 @@ class RSSCollector:
             }
         
         # Clean the suggested reply
-        ai_result["suggested_reply"] = clean_reply(ai_result.get("suggested_reply", ""))
+        ai_result.get('suggested_reply', ''),  # Reply
         
         # Prepare row for Google Sheets
         row = [
