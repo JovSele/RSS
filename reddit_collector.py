@@ -70,23 +70,44 @@ RSS_FEEDS = [
 
 # Positive keywords (must contain at least 1)
 POSITIVE_KEYWORDS = [
-    "zapier", "automation", "workflow", "manual", "broke", "broken", "messy",
-    "documentation", "handoff", "too many", "nobody knows", "tribal knowledge",
-    "spreadsheet", "inherited", "took over", "process", "integration", "reporting",
-    "undocumented", "maintenance", "audit", "cleanup", "lost documentation",
-    "who built", "only person", "operations", "crm", "tools", "system"
+    "automate zapier", "automation audit", "automation broke",
+    "automation handoff", "automation maintenance", "automation stopped",
+    "clean up zapier", "copy paste", "document workflows",
+    "documentation missing", "doing this manually", "excel tracking",
+    "inherited automation", "inherited this", "inherited zaps",
+    "knowledge transfer", "left the company", "lost documentation",
+    "maintaining zapier", "manual client onboarding", "manual crm",
+    "manual process", "messy zaps", "need zapier help",
+    "nobody documented", "nobody knows how", "one who knows",
+    "only one who", "only person who", "operations are messy",
+    "operations chaos", "person who knows", "person who understands",
+    "process documentation", "repetitive task", "reverse engineering",
+    "spreadsheet tracking", "systems are messy", "too many automations",
+    "too many spreadsheets", "too many tools", "too many zaps",
+    "took over automation", "took over zapier", "tracking in excel",
+    "tribal knowledge", "undocumented workflows", "who built this",
+    "workflow documentation", "workflow handoff", "workflow is messy",
+    "zap breaking", "zap failed", "zap stopped working",
+    "zapier audit", "zapier broke", "zapier cleanup", "zapier help",
+    "zapier maintenance", "zapier setup", "zapier tasks limit"
 ]
 
 # Negative keywords (skip if contains)
 NEGATIVE_KEYWORDS = [
-    "hiring", "job offer", "looking for work", "we are hiring", "salary", "resume",
-    "portfolio", "giveaway", "promo code", "discount", "just launched my",
-    "check out my", "follow me", "subscribe to", "crypto", "nft", "invest",
-    "trading", "dating", "relationship", "meme", "funny", "joke",
-    "i built", "i'm offering", "free audit", "offering free",
-    "i created", "just launched", "i made a tool", "my tool", "sign up",
-    "try it free", "dm me", "how i solved", "how i automated", "how i fixed",
-    "i ditched", "i stopped", "i switched from"
+    "amazon", "apply for", "apply now", "book a call", "book a demo",
+    "bootcamp", "captcha", "case study", "comment below", "construction",
+    "course", "cv", "data entry work", "dm me", "download", "ebook",
+    "ecommerce", "followers", "free audit", "free trial", "guide",
+    "healthcare", "hiring", "home job", "check out our", "schedule a",
+    "imo app", "interested candidates", "job", "job opening", "jobs",
+    "link below", "link in comments", "location", "logistics",
+    "manufacturing", "newsletter", "now hiring", "our platform",
+    "our solution", "pan india", "podcast", "real estate", "recruiter",
+    "repost", "resume", "send cv", "shopify", "sign up",
+    "signal messenger", "supply chain", "template", "training",
+    "typing work", "urgent role", "we are hiring", "we build",
+    "we help", "we offer", "webinar", "whatsapp number",
+    "whitepaper", "work from home"
 ]
 
 BAD_PHRASES = [
