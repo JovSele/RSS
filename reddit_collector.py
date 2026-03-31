@@ -56,27 +56,26 @@ RSS_FEEDS = [
     "https://www.reddit.com/r/agency/search.rss?q=zapier&sort=new&restrict_sr=on",
     
     # Google Alerts - LinkedIn (Placeholders - Add your own URLs)
-    # Google Alerts - LinkedIn
-    "https://www.google.com/alerts/feeds/10605284653761947770/1930647001397350284",   # inherited automation | took over zapier | lost documentation
-    "https://www.google.com/alerts/feeds/10605284653761947770/16807138486699545487",  # nobody documented | undocumented workflows | tribal knowledge
-    "https://www.google.com/alerts/feeds/10605284653761947770/12382831229290357458",  # too many zaps | zapier audit | zapier broke
-    "https://www.google.com/alerts/feeds/10605284653761947770/7848504172895227274",   # workflow handoff | automation handoff | zapier maintenance
-    "https://www.google.com/alerts/feeds/10605284653761947770/15124295494046487805",  # who built this | only person who | nobody knows how
-    "https://www.google.com/alerts/feeds/10605284653761947770/2564161575319394976",   # manual process | spreadsheet tracking | too many tools
-    "https://www.google.com/alerts/feeds/10605284653761947770/10542726945636691882",  # messy zaps | zapier cleanup | workflow documentation
-    "https://www.google.com/alerts/feeds/10605284653761947770/11566407019114144222",  # took over automation | inherited zaps | reverse engineering
-    "https://www.google.com/alerts/feeds/10605284653761947770/5982446574786773670",   # operations are messy | systems are messy | operations chaos
-    "https://www.google.com/alerts/feeds/10605284653761947770/7369903839107261360",   # knowledge transfer | person who knows | one who knows
-    # "https://www.google.com/alerts/feeds/XXXX/XXXX",  # "took over zapier"
-    # "https://www.google.com/alerts/feeds/XXXX/XXXX",  # "nobody documented"
-    # "https://www.google.com/alerts/feeds/XXXX/XXXX",  # "messy automation"
-    # "https://www.google.com/alerts/feeds/XXXX/XXXX",  # "inherited workflow"
-    # "https://www.google.com/alerts/feeds/XXXX/XXXX",  # "broken zapier"
-    # "https://www.google.com/alerts/feeds/XXXX/XXXX",  # "automation maintenance"
-    # "https://www.google.com/alerts/feeds/XXXX/XXXX",  # "undocumented process"
-    # "https://www.google.com/alerts/feeds/XXXX/XXXX",  # "workflow cleanup"
-    # "https://www.google.com/alerts/feeds/XXXX/XXXX",  # "zapier cost"
-    # "https://www.google.com/alerts/feeds/XXXX/XXXX",  # "manual reporting"
+    "https://www.google.com/alerts/feeds/10605284653761947770/17547666453224584072",  # took over zapier
+    "https://www.google.com/alerts/feeds/10605284653761947770/11799962196978559227",  # inherited automation
+    "https://www.google.com/alerts/feeds/10605284653761947770/11205966101093525896",  # zapier audit
+    "https://www.google.com/alerts/feeds/10605284653761947770/2957016071162074905",   # zapier broke
+    "https://www.google.com/alerts/feeds/10605284653761947770/3088012883186134098",   # too many zaps
+    "https://www.google.com/alerts/feeds/10605284653761947770/8706557038309823380",   # messy zaps
+    "https://www.google.com/alerts/feeds/10605284653761947770/16545658599802679305",  # zapier maintenance
+    "https://www.google.com/alerts/feeds/10605284653761947770/6875575467182349121",   # workflow handoff
+    "https://www.google.com/alerts/feeds/10605284653761947770/10698494035640013000",  # automation handoff
+    "https://www.google.com/alerts/feeds/10605284653761947770/5283008468998240233",   # undocumented workflows
+    "https://www.google.com/alerts/feeds/10605284653761947770/2944949419624491757",   # nobody documented
+    "https://www.google.com/alerts/feeds/10605284653761947770/10638649173406501531",  # tribal knowledge
+    "https://www.google.com/alerts/feeds/10605284653761947770/637427977252961531",    # lost documentation
+    "https://www.google.com/alerts/feeds/10605284653761947770/9947997926182776142",   # who built this
+    "https://www.google.com/alerts/feeds/10605284653761947770/16104753547817923697",  # nobody knows how
+    "https://www.google.com/alerts/feeds/10605284653761947770/4834273587035497087",   # only person who
+    "https://www.google.com/alerts/feeds/10605284653761947770/9947997926182774748",   # took over automation
+    "https://www.google.com/alerts/feeds/10605284653761947770/13365351787220754925",  # workflow documentation
+    "https://www.google.com/alerts/feeds/10605284653761947770/1239498199882998243",   # too many tools
+    "https://www.google.com/alerts/feeds/10605284653761947770/8699520351222471960",   # spreadsheet tracking
 ]
 
 # Positive keywords (must contain at least 1)
