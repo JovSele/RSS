@@ -312,4 +312,4 @@ git push
 Zmena je jednoduchá — v reddit_collector.py nájdi:
 pythonmodel="claude-haiku-4-5-20251001"
 Zmeň na:
-pythonmodel="claude-sonnet-4-5-20250514"
+pythonmodel="claude-sonnet-4-5-20250514"secret	t9UY7N7UE4S3l2lmVLtOJ2u1UevieA
