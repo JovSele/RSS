@@ -376,12 +376,23 @@ class RSSCollector:
     
     def fetch_feed(self, feed_url: str) -> List[Dict]:
         """Fetch and parse an RSS feed"""
+        import random
+        user_agents = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        ]
         try:
-            feed = feedparser.parse(feed_url)
-            if feed.bozo:  # Feed parsing error
+            headers = {
+                "User-Agent": random.choice(user_agents),
+                "Accept": "application/rss+xml, application/xml, text/xml, */*",
+            }
+            feed = feedparser.parse(feed_url, request_headers=headers)
+
+            if feed.bozo:
                 print(f"⚠ Warning: Feed parsing error for {feed_url}: {feed.bozo_exception}")
                 return []
-            
+
             posts = []
             for entry in feed.entries:
                 post = {
@@ -393,9 +404,9 @@ class RSSCollector:
                     'source': extract_source_name(feed_url)
                 }
                 posts.append(post)
-            
+
             return posts
-            
+
         except Exception as e:
             print(f"⚠ Warning: Failed to fetch feed {feed_url}: {e}")
             return []
