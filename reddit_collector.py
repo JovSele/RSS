@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-RSS Lead Collector for Reddit and Google Alerts
-Monitors RSS feeds, filters by keywords, scores with Claude AI, and saves to Google Sheets
-"""
-
 import os
 import sys
 import json
@@ -13,17 +8,13 @@ import random
 from datetime import datetime
 from typing import List, Dict, Set, Optional
 import feedparser
+import requests
 import gspread
 from google.oauth2.service_account import Credentials
 from anthropic import Anthropic
 from bs4 import BeautifulSoup
 
-# ============================================================================
-# CONFIGURATION
-# ============================================================================
-
 RSS_FEEDS = [
-    # Reddit - New Posts
     "https://www.reddit.com/r/zapier/new.rss",
     "https://www.reddit.com/r/nocode/new.rss",
     "https://www.reddit.com/r/automation/new.rss",
@@ -38,7 +29,6 @@ RSS_FEEDS = [
     "https://www.reddit.com/r/salesforce/new.rss",
     "https://www.reddit.com/r/ecommerce/new.rss",
     "https://www.reddit.com/r/SaaS/new.rss",
-    # Reddit - Search Queries (sort=new)
     "https://www.reddit.com/r/zapier/search.rss?q=zapier&sort=new&restrict_sr=on",
     "https://www.reddit.com/r/zapier/search.rss?q=automation&sort=new&restrict_sr=on",
     "https://www.reddit.com/r/zapier/search.rss?q=workflow&sort=new&restrict_sr=on",
@@ -53,27 +43,26 @@ RSS_FEEDS = [
     "https://www.reddit.com/r/smallbusiness/search.rss?q=tools&sort=new&restrict_sr=on",
     "https://www.reddit.com/r/revops/search.rss?q=automation&sort=new&restrict_sr=on",
     "https://www.reddit.com/r/agency/search.rss?q=zapier&sort=new&restrict_sr=on",
-    # Google Alerts - LinkedIn
-    "https://www.google.com/alerts/feeds/10605284653761947770/17547666453224584072",  # took over zapier
-    "https://www.google.com/alerts/feeds/10605284653761947770/11799962196978559227",  # inherited automation
-    "https://www.google.com/alerts/feeds/10605284653761947770/11205966101093525896",  # zapier audit
-    "https://www.google.com/alerts/feeds/10605284653761947770/2957016071162074905",   # zapier broke
-    "https://www.google.com/alerts/feeds/10605284653761947770/3088012883186134098",   # too many zaps
-    "https://www.google.com/alerts/feeds/10605284653761947770/8706557038309823380",   # messy zaps
-    "https://www.google.com/alerts/feeds/10605284653761947770/16545658599802679305",  # zapier maintenance
-    "https://www.google.com/alerts/feeds/10605284653761947770/6875575467182349121",   # workflow handoff
-    "https://www.google.com/alerts/feeds/10605284653761947770/10698494035640013000",  # automation handoff
-    "https://www.google.com/alerts/feeds/10605284653761947770/5283008468998240233",   # undocumented workflows
-    "https://www.google.com/alerts/feeds/10605284653761947770/2944949419624491757",   # nobody documented
-    "https://www.google.com/alerts/feeds/10605284653761947770/10638649173406501531",  # tribal knowledge
-    "https://www.google.com/alerts/feeds/10605284653761947770/637427977252961531",    # lost documentation
-    "https://www.google.com/alerts/feeds/10605284653761947770/9947997926182776142",   # who built this
-    "https://www.google.com/alerts/feeds/10605284653761947770/16104753547817923697",  # nobody knows how
-    "https://www.google.com/alerts/feeds/10605284653761947770/4834273587035497087",   # only person who
-    "https://www.google.com/alerts/feeds/10605284653761947770/9947997926182774748",   # took over automation
-    "https://www.google.com/alerts/feeds/10605284653761947770/13365351787220754925",  # workflow documentation
-    "https://www.google.com/alerts/feeds/10605284653761947770/1239498199882998243",   # too many tools
-    "https://www.google.com/alerts/feeds/10605284653761947770/8699520351222471960",   # spreadsheet tracking
+    "https://www.google.com/alerts/feeds/10605284653761947770/17547666453224584072",
+    "https://www.google.com/alerts/feeds/10605284653761947770/11799962196978559227",
+    "https://www.google.com/alerts/feeds/10605284653761947770/11205966101093525896",
+    "https://www.google.com/alerts/feeds/10605284653761947770/2957016071162074905",
+    "https://www.google.com/alerts/feeds/10605284653761947770/3088012883186134098",
+    "https://www.google.com/alerts/feeds/10605284653761947770/8706557038309823380",
+    "https://www.google.com/alerts/feeds/10605284653761947770/16545658599802679305",
+    "https://www.google.com/alerts/feeds/10605284653761947770/6875575467182349121",
+    "https://www.google.com/alerts/feeds/10605284653761947770/10698494035640013000",
+    "https://www.google.com/alerts/feeds/10605284653761947770/5283008468998240233",
+    "https://www.google.com/alerts/feeds/10605284653761947770/2944949419624491757",
+    "https://www.google.com/alerts/feeds/10605284653761947770/10638649173406501531",
+    "https://www.google.com/alerts/feeds/10605284653761947770/637427977252961531",
+    "https://www.google.com/alerts/feeds/10605284653761947770/9947997926182776142",
+    "https://www.google.com/alerts/feeds/10605284653761947770/16104753547817923697",
+    "https://www.google.com/alerts/feeds/10605284653761947770/4834273587035497087",
+    "https://www.google.com/alerts/feeds/10605284653761947770/9947997926182774748",
+    "https://www.google.com/alerts/feeds/10605284653761947770/13365351787220754925",
+    "https://www.google.com/alerts/feeds/10605284653761947770/1239498199882998243",
+    "https://www.google.com/alerts/feeds/10605284653761947770/8699520351222471960",
 ]
 
 POSITIVE_KEYWORDS = [
@@ -155,18 +144,14 @@ RATE_LIMIT_BETWEEN_FEEDS = 1.0
 MAX_CONTENT_FOR_SHEETS = 500
 MAX_CONTENT_FOR_AI = 600
 SHEET_COLUMNS = ["Date", "Source", "Title", "URL", "Content", "Author", "Score", "Problem_Type", "Buyer_Intent", "Reply", "Status"]
-
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 ]
 
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
 
-def clean_html(text: str) -> str:
+def clean_html(text):
     if not text:
         return ""
     soup = BeautifulSoup(text, 'html.parser')
@@ -174,41 +159,41 @@ def clean_html(text: str) -> str:
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
-def truncate_text(text: str, max_length: int) -> str:
+
+def truncate_text(text, max_length):
     if len(text) <= max_length:
         return text
     return text[:max_length] + "..."
 
-def contains_positive_keyword(text: str) -> bool:
-    text_lower = text.lower()
-    return any(keyword.lower() in text_lower for keyword in POSITIVE_KEYWORDS)
 
-def contains_negative_keyword(text: str) -> bool:
+def contains_positive_keyword(text):
     text_lower = text.lower()
-    return any(keyword.lower() in text_lower for keyword in NEGATIVE_KEYWORDS)
+    return any(k.lower() in text_lower for k in POSITIVE_KEYWORDS)
 
-def extract_source_name(feed_url: str) -> str:
+
+def contains_negative_keyword(text):
+    text_lower = text.lower()
+    return any(k.lower() in text_lower for k in NEGATIVE_KEYWORDS)
+
+
+def extract_source_name(feed_url):
     if "reddit.com" in feed_url:
         match = re.search(r'/r/([^/]+)/', feed_url)
         if match:
             subreddit = match.group(1)
             if "search.rss" in feed_url:
-                query_match = re.search(r'q=([^&]+)', feed_url)
-                if query_match:
-                    query = query_match.group(1)
-                    return f"Reddit: r/{subreddit} (search: {query})"
+                q = re.search(r'q=([^&]+)', feed_url)
+                if q:
+                    return f"Reddit: r/{subreddit} (search: {q.group(1)})"
             return f"Reddit: r/{subreddit}"
     elif "google.com/alerts" in feed_url:
         return "Google Alerts (LinkedIn)"
     return feed_url
 
-# ============================================================================
-# GOOGLE SHEETS INTEGRATION
-# ============================================================================
 
 class GoogleSheetsClient:
 
-    def __init__(self, credentials_json: str, sheet_id: str):
+    def __init__(self, credentials_json, sheet_id):
         try:
             creds_dict = json.loads(credentials_json)
             scopes = [
@@ -223,7 +208,7 @@ class GoogleSheetsClient:
             print(f"✗ CRITICAL: Failed to connect to Google Sheets: {e}")
             raise
 
-    def get_existing_urls(self) -> Set[str]:
+    def get_existing_urls(self):
         try:
             all_values = self.sheet.get_all_values()
             if len(all_values) <= 1:
@@ -247,24 +232,21 @@ class GoogleSheetsClient:
         except Exception as e:
             print(f"⚠ Warning: Could not set headers: {e}")
 
-    def append_row(self, row_data: List[str]):
+    def append_row(self, row_data):
         try:
             self.sheet.append_row(row_data)
         except Exception as e:
             print(f"⚠ Warning: Failed to append row: {e}")
             raise
 
-# ============================================================================
-# AI SCORING
-# ============================================================================
 
 class AIScorer:
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key):
         self.client = Anthropic(api_key=api_key)
         print("✓ Claude AI client initialized")
 
-    def score_post(self, title: str, content: str, source: str) -> Optional[Dict]:
+    def score_post(self, title, content, source):
         try:
             prompt = AI_PROMPT_TEMPLATE.format(
                 title=title,
@@ -282,20 +264,13 @@ class AIScorer:
                 response_text = json_match.group(0)
             result = json.loads(response_text)
             required_fields = ["score", "problem_type", "buyer_intent", "reason"]
-            if not all(field in result for field in required_fields):
-                print(f"⚠ Warning: AI response missing required fields")
+            if not all(f in result for f in required_fields):
                 return None
             return result
-        except json.JSONDecodeError as e:
-            print(f"⚠ Warning: Failed to parse AI JSON response: {e}")
-            return None
         except Exception as e:
             print(f"⚠ Warning: AI scoring failed: {e}")
             return None
 
-# ============================================================================
-# MAIN COLLECTOR
-# ============================================================================
 
 class RSSCollector:
 
@@ -305,17 +280,16 @@ class RSSCollector:
         self.google_credentials_json = os.getenv('GOOGLE_CREDENTIALS_JSON')
 
         if not self.anthropic_api_key:
-            raise ValueError("ANTHROPIC_API_KEY environment variable not set")
+            raise ValueError("ANTHROPIC_API_KEY not set")
         if not self.google_sheets_id:
-            raise ValueError("GOOGLE_SHEETS_ID environment variable not set")
+            raise ValueError("GOOGLE_SHEETS_ID not set")
         if not self.google_credentials_json:
-            raise ValueError("GOOGLE_CREDENTIALS_JSON environment variable not set")
+            raise ValueError("GOOGLE_CREDENTIALS_JSON not set")
 
         self.sheets_client = GoogleSheetsClient(self.google_credentials_json, self.google_sheets_id)
         self.sheets_client.ensure_headers()
         self.ai_scorer = AIScorer(self.anthropic_api_key)
         self.existing_urls = self.sheets_client.get_existing_urls()
-
         self.stats = {
             'feeds_processed': 0,
             'posts_fetched': 0,
@@ -325,46 +299,42 @@ class RSSCollector:
             'saved_to_sheets': 0
         }
 
-def fetch_feed(self, feed_url: str) -> List[Dict]:
-    try:
-        headers = {
-            "User-Agent": random.choice(USER_AGENTS),
-            "Accept": "application/rss+xml, application/xml, text/xml, */*",
-        }
-        
-        if "reddit.com" in feed_url:
-            import requests
-            response = requests.get(feed_url, headers=headers, timeout=10)
-            if response.status_code != 200:
-                print(f"⚠ Warning: HTTP {response.status_code} for {feed_url}")
-                return []
-            feed = feedparser.parse(response.text)
-        else:
-            feed = feedparser.parse(feed_url, request_headers=headers)
+    def fetch_feed(self, feed_url):
+        try:
+            headers = {
+                "User-Agent": random.choice(USER_AGENTS),
+                "Accept": "application/rss+xml, application/xml, text/xml, */*",
+            }
+            if "reddit.com" in feed_url:
+                response = requests.get(feed_url, headers=headers, timeout=15)
+                if response.status_code != 200:
+                    print(f"⚠ Warning: HTTP {response.status_code} for {feed_url}")
+                    return []
+                feed = feedparser.parse(response.text)
+            else:
+                feed = feedparser.parse(feed_url, request_headers=headers)
 
-        if feed.bozo and not feed.entries:
-            print(f"⚠ Warning: Feed parsing error for {feed_url}: {feed.bozo_exception}")
+            if feed.bozo and not feed.entries:
+                print(f"⚠ Warning: Feed error for {feed_url}: {feed.bozo_exception}")
+                return []
+
+            posts = []
+            for entry in feed.entries:
+                post = {
+                    'title': entry.get('title', ''),
+                    'url': entry.get('link', ''),
+                    'content': entry.get('summary', '') or entry.get('content', [{}])[0].get('value', ''),
+                    'author': entry.get('author', ''),
+                    'source': extract_source_name(feed_url)
+                }
+                posts.append(post)
+            return posts
+
+        except Exception as e:
+            print(f"⚠ Warning: Failed to fetch feed {feed_url}: {e}")
             return []
 
-        posts = []
-        for entry in feed.entries:
-            post = {
-                'title': entry.get('title', ''),
-                'url': entry.get('link', ''),
-                'content': entry.get('summary', '') or entry.get('content', [{}])[0].get('value', ''),
-                'author': entry.get('author', ''),
-                'published': entry.get('published', ''),
-                'source': extract_source_name(feed_url)
-            }
-            posts.append(post)
-
-        return posts
-
-    except Exception as e:
-        print(f"⚠ Warning: Failed to fetch feed {feed_url}: {e}")
-        return []
-
-    def process_post(self, post: Dict) -> bool:
+    def process_post(self, post):
         if post['url'] in self.existing_urls:
             self.stats['duplicates_skipped'] += 1
             return False
@@ -381,21 +351,11 @@ def fetch_feed(self, feed_url: str) -> List[Dict]:
             return False
 
         time.sleep(RATE_LIMIT_BETWEEN_POSTS)
-
         self.stats['passed_to_ai'] += 1
-        ai_result = self.ai_scorer.score_post(
-            post['title'],
-            clean_content,
-            post['source']
-        )
 
+        ai_result = self.ai_scorer.score_post(post['title'], clean_content, post['source'])
         if not ai_result:
-            ai_result = {
-                'score': '',
-                'problem_type': '',
-                'buyer_intent': '',
-                'reason': '',
-            }
+            ai_result = {'score': '', 'problem_type': '', 'buyer_intent': '', 'reason': ''}
 
         row = [
             datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -407,8 +367,8 @@ def fetch_feed(self, feed_url: str) -> List[Dict]:
             str(ai_result.get('score', '')),
             ai_result.get('problem_type', ''),
             ai_result.get('buyer_intent', ''),
-            '',  # Reply - empty
-            ''   # Status - empty
+            '',
+            ''
         ]
 
         try:
@@ -427,9 +387,6 @@ def fetch_feed(self, feed_url: str) -> List[Dict]:
         print("="*80 + "\n")
 
         for feed_url in RSS_FEEDS:
-            if feed_url.strip().startswith('#'):
-                continue
-
             print(f"\n📡 Fetching feed: {extract_source_name(feed_url)}")
             posts = self.fetch_feed(feed_url)
             self.stats['feeds_processed'] += 1
@@ -455,10 +412,6 @@ def fetch_feed(self, feed_url: str) -> List[Dict]:
         print(f"Total saved to Sheets:      {self.stats['saved_to_sheets']}")
         print("="*80 + "\n")
 
-
-# ============================================================================
-# MAIN ENTRY POINT
-# ============================================================================
 
 def main():
     try:
