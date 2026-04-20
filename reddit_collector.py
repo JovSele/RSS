@@ -325,35 +325,44 @@ class RSSCollector:
             'saved_to_sheets': 0
         }
 
-    def fetch_feed(self, feed_url: str) -> List[Dict]:
-        try:
-            headers = {
-                "User-Agent": random.choice(USER_AGENTS),
-                "Accept": "application/rss+xml, application/xml, text/xml, */*",
-            }
+def fetch_feed(self, feed_url: str) -> List[Dict]:
+    try:
+        headers = {
+            "User-Agent": random.choice(USER_AGENTS),
+            "Accept": "application/rss+xml, application/xml, text/xml, */*",
+        }
+        
+        if "reddit.com" in feed_url:
+            import requests
+            response = requests.get(feed_url, headers=headers, timeout=10)
+            if response.status_code != 200:
+                print(f"⚠ Warning: HTTP {response.status_code} for {feed_url}")
+                return []
+            feed = feedparser.parse(response.text)
+        else:
             feed = feedparser.parse(feed_url, request_headers=headers)
 
-            if feed.bozo:
-                print(f"⚠ Warning: Feed parsing error for {feed_url}: {feed.bozo_exception}")
-                return []
-
-            posts = []
-            for entry in feed.entries:
-                post = {
-                    'title': entry.get('title', ''),
-                    'url': entry.get('link', ''),
-                    'content': entry.get('summary', '') or entry.get('content', [{}])[0].get('value', ''),
-                    'author': entry.get('author', ''),
-                    'published': entry.get('published', ''),
-                    'source': extract_source_name(feed_url)
-                }
-                posts.append(post)
-
-            return posts
-
-        except Exception as e:
-            print(f"⚠ Warning: Failed to fetch feed {feed_url}: {e}")
+        if feed.bozo and not feed.entries:
+            print(f"⚠ Warning: Feed parsing error for {feed_url}: {feed.bozo_exception}")
             return []
+
+        posts = []
+        for entry in feed.entries:
+            post = {
+                'title': entry.get('title', ''),
+                'url': entry.get('link', ''),
+                'content': entry.get('summary', '') or entry.get('content', [{}])[0].get('value', ''),
+                'author': entry.get('author', ''),
+                'published': entry.get('published', ''),
+                'source': extract_source_name(feed_url)
+            }
+            posts.append(post)
+
+        return posts
+
+    except Exception as e:
+        print(f"⚠ Warning: Failed to fetch feed {feed_url}: {e}")
+        return []
 
     def process_post(self, post: Dict) -> bool:
         if post['url'] in self.existing_urls:
