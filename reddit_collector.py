@@ -374,7 +374,7 @@ class RSSCollector:
             'saved_to_sheets': 0
         }
     
-     def fetch_feed(self, feed_url: str) -> List[Dict]:
+    def fetch_feed(self, feed_url: str) -> List[Dict]:
          """Fetch and parse an RSS feed"""
          try:
              import random
