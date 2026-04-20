@@ -22,7 +22,6 @@ RSS_FEEDS = [
     "https://www.reddit.com/r/Entrepreneur/new.rss",
     "https://www.reddit.com/r/startups/new.rss",
     "https://www.reddit.com/r/revops/new.rss",
-    "https://www.reddit.com/r/operations/new.rss",
     "https://www.reddit.com/r/agency/new.rss",
     "https://www.reddit.com/r/shopify/new.rss",
     "https://www.reddit.com/r/hubspot/new.rss",
